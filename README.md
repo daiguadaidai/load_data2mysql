@@ -1,7 +1,7 @@
 # load_data2mysql
 读取相关文件的数据并加载到数据库中(如excel, csv等数据)
 
-···
+```
 python load_data2mysql.py --help
 usage: load_data2mysql.py [-h] --host HOST --port PORT --username USERNAME
                           --password PASSWORD --database DATABASE --table
@@ -29,5 +29,4 @@ python load_data2mysql.py \
     --table ord_express \
     --type excel \
     --file /tmp/ord_express.xlsx
-
-···
+```
