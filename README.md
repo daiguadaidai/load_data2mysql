@@ -1,6 +1,13 @@
 # load_data2mysql
 读取相关文件的数据并加载到数据库中(如excel, csv等数据)
 
+##### 需要安装的Python模块
+```
+pip install sqlalchemy
+pip install pandas
+```
+
+##### 基本使用方法
 ```
 python load_data2mysql.py --help
 usage: load_data2mysql.py [-h] --host HOST --port PORT --username USERNAME

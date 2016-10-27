@@ -31,13 +31,14 @@ class LoadData2Mysql(object):
         # 初始化能传输数据的方法
         self.func_dict = {
             'excel': self.read_excel2mysql,
+            'csv': self.read_csv2mysql,
         }
 
-    def read_file2mysql(self, file, type, table):
+    def read_file2mysql(self, file, type, table, *args, **kargs):
         """通过给的文件名，文件类型，表明执行不同的数据载入方法"""
         return self.func_dict[type](file, table)
 
-    def read_excel2mysql(self, file, table):
+    def read_excel2mysql(self, file, table, *args, **kargs):
         """加载excel数据到MySQL中Excel中的数据标题要对应MySQL中的字段， 
            注意: 字段只允许少，不允许多。 
         """ 
@@ -55,6 +56,29 @@ class LoadData2Mysql(object):
 
         return True
 
+    def read_csv2mysql(self, file, table, *args, **kargs):
+        """加载csv数据到MySQL中csv中的数据标题要对应MySQL中的字段， 
+        Args:
+            file: 文件名
+            table: 执行需要插入数据的表名
+            sep: csv 文件的分隔符
+            delimiter: csv 文件的行分割符
+        Return: True/False
+        注意: 字段只允许少，不允许多。 
+        """ 
+        print 'start load data ...'
+        print 'file name: {file}'.format(file = file)
+        print 'table name: {table}'.format(table = table)
+        # 读取excel数据
+        self.df = pd.read_csv(file, **kargs)
+        # 将数据保存到数据库中
+        self.df.to_sql(table,
+                       self.engine,
+                       if_exists='append',
+                       index=False)
+        print '=============== load successful ==============='
+
+        return True
 
 
 def parse_args():
@@ -97,6 +121,14 @@ Description:
     parser.add_argument('--file', dest='file', required = True,
                       action='store', default='',
                       help='Input file name [goods.xlsx | goods.csv]', metavar='FILE')
+    # 添加 csv 文件的每个字段的分隔符 参数
+    parser.add_argument('--sep', dest='sep',
+                      action='store', default=',',
+                      help='Direct csv file seperator default ","', metavar='SEP')
+    # 添加 csv 文件每一行的分隔符 参数
+    parser.add_argument('--delimiter', dest='delimiter',
+                      action='store', default=None,
+                      help='Direct csv file every row delimiter default "\\n"', metavar='DELIMITER')
 
     args = parser.parse_args()
 
@@ -110,7 +142,8 @@ def main():
                                      username = args.username, password = args.password,
                                      database = args.database)
     # 读取文件将数据存入MySQL
-    load_data2mysql.read_file2mysql(args.file, args.type, args.table)
+    load_data2mysql.read_file2mysql(args.file, args.type, args.table,
+                                    sep=args.sep, delimiter=args.delimiter)
     
 if __name__ == '__main__':
     main()
