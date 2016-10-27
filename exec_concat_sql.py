@@ -32,7 +32,6 @@ class ExecConcatSQL(object):
                        '?charset={charset}'.format(**self.db_conf))
         # 获得连接数据库对象
         self.qdl_engine = create_engine(self.db_str)
-        self.dml_engine = create_engine(self.db_str)
 
         self.DB_Session = sessionmaker(bind=self.qdl_engine)
 
