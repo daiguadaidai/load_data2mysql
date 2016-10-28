@@ -62,18 +62,66 @@ UPDATE pro_goods SET supplier_price=2.00 WHERE goods_id="357265838181376";
 UPDATE pro_goods SET supplier_price=2.12 WHERE goods_id="357839261404160";
 ```
 
-使用方法:
-##### 1.编辑exec_concat_sql.py
+##### 使用方法
+1. 编辑exec_concat_sql.py
+
 `main()` 函数中有一个 `sql` 变量修改它就好, 换成自己的SQL就好
 ```
-    sql = """
-    SELECT goods_id,
-        MIN(retail_price),
-        CONCAT('UPDATE pro_goods SET supplier_price=', MIN(pgs.retail_price), ' WHERE goods_id="', goods_id, '";') AS execute_sql
-    FROM pro_goods_sku AS pgs
-    GROUP BY goods_id LIMIT 0, 1000;
-    """
-
+sql = """
+SELECT goods_id,
+    MIN(retail_price),
+    CONCAT('UPDATE pro_goods SET supplier_price=', MIN(pgs.retail_price), ' WHERE goods_id="', goods_id, '";') AS execute_sql
+FROM pro_goods_sku AS pgs
+GROUP BY goods_id LIMIT 0, 1000;
+"""
 
 python exec_concat_sql.py
 ```
+
+## select_data2mysql.py
+该程序是将SELECT语句获得的结果在Insert到另外一个数据库表中(同一个库也是可以的),
+程序可以设置需要更新的字段, 如果在Insert出现`DUPLICATE`的错误将对你指定的字段进行更新
+
+#####  使用方法
+1. 编写SELECT语句
+```
+sql = """
+SELECT express_id,
+    express_name,
+    express_code,
+    create_time
+FROM ord_express_bak;
+"""
+```
+
+2. 编辑`select_data2mysql.py`文件中数据库的配置
+
+```
+conf = {
+    'qdl_username': 'HH',
+    'qdl_password': 'oracle',
+    'qdl_host': '192.168.1.233',
+    'qdl_port': 3306,
+    'qdl_database': 'test',
+    'qdl_charset': 'utf8',
+
+    'dml_username': 'HH',
+    'dml_password': 'oracle',
+    'dml_host': '192.168.1.233',
+    'dml_port': 3306,
+    'dml_database': 'test',
+    'dml_charset': 'utf8',
+}
+```
+
+3. 设置出现插入重复需要更新的字段, 和每次插入数据的大小
+
+```
+select_data2mysql = SelectData2Mysql(**conf)
+select_data2mysql.bind_dml_table('ord_express') # 需要执行Insert语句的表
+select_data2mysql.execute_select_sql(sql)
+# 设置每次Insert的大小和重复时需要更新的字段
+select_data2mysql.execute_insert_dup_update(size=10000, cols=['create_time'])
+```
+
+> **Tips**: 由于有时候SELECT出来的数据太多，所以要分批次进行Insert, 具体每次Insert多少要根据自己的实际环境要确定.从而避免在数据库中执行大事务

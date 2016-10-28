@@ -3,7 +3,6 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import pandas as pd
 import traceback
 import sys
 
