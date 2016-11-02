@@ -125,3 +125,25 @@ select_data2mysql.execute_insert_dup_update(size=10000, cols=['create_time'])
 ```
 
 > **Tips**: 由于有时候SELECT出来的数据太多，所以要分批次进行Insert, 具体每次Insert多少要根据自己的实际环境要确定.从而避免在数据库中执行大事务
+
+## read_multi_line2str
+读取文本文件中的每一行数据, 并指定一个结束符从而将多行变成一个字符串输出. 如下:
+```
+aaaaaaaaaaaaaaa.
+bbbbbbbbbbbbbbb,
+ccccccccccccccc-
+ddddddddddddddd
+上面文本如果以 逗号(,)未终止字符文本将分为两字符串
+第一个字符串:
+aaaaaaaaaaaaaaa.
+bbbbbbbbbbbbbbb,
+第二个字符串
+ccccccccccccccc-
+ddddddddddddddd
+```
+
+##### 效果展现
+具体如何使用请看文件中的main方法
+```
+python read_multi_line2str.py
+```
