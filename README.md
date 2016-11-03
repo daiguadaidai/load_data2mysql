@@ -147,3 +147,53 @@ ddddddddddddddd
 ```
 python read_multi_line2str.py
 ```
+
+## create_class_property
+通过一个实例生成类的 `getter` `setter` 方法
+
+**主要代码解释** 
+```
+def main():
+    import inspect
+    import BackupBase # 导入需要生成 getter 和 setter 方法的类
+
+    obj = BackupBase() # 实例化对象
+    obj_class_name = obj.__class__.__name__ # 获得实例的类的名称
+
+    for name, value in inspect.getmembers(obj): # 循环类的属性
+        # 判断是否是私有变量
+        if (name.startswith('_') and not name.startswith('__')
+           and not name.startswith('_{class_name}'.format(class_name=obj_class_name))
+           and not inspect.isroutine(value)):
+
+            property = name.lstrip('_')
+            create_getter_setter(property) # 创建getter setter 方法
+```
+
+**运行/结果:**
+```
+python create_class_property.py
+
+    @property
+    def cmd_path(self):
+        """cmd_path 是一个属性 - getter 方法"""
+        return self._cmd_path
+
+    @cmd_path.setter
+    def cmd_path(self, value):
+        """cmd_path属性的 setter 方法"""
+        self._cmd_path = value
+
+    ...
+
+    @property
+    def remote_dir(self):
+        """remote_dir 是一个属性 - getter 方法"""
+        return self._remote_dir
+
+    @remote_dir.setter
+    def remote_dir(self, value):
+        """remote_dir属性的 setter 方法"""
+        self._remote_dir = value
+```
+
