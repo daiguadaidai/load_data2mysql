@@ -122,6 +122,8 @@ select_data2mysql.bind_dml_table('ord_express') # 需要执行Insert语句的表
 select_data2mysql.execute_select_sql(sql)
 # 设置每次Insert的大小和重复时需要更新的字段
 select_data2mysql.execute_insert_dup_update(size=10000, cols=['create_time'])
+# 如果有设置is_insert_ignore则生成 INSERT IGNORE INTO 的批量插入语句
+# select_data2mysql.execute_insert_dup_update(size=10000, cols=['create_time'], is_insert_ignore=True)
 ```
 
 > **Tips**: 由于有时候SELECT出来的数据太多，所以要分批次进行Insert, 具体每次Insert多少要根据自己的实际环境要确定.从而避免在数据库中执行大事务
