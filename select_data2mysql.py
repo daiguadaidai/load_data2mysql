@@ -70,12 +70,46 @@ class SelectData2Mysql(object):
         """执行SELECT SQL"""
         self.qdl_rs = self.qdl_conn.execute(sql)
 
+    def execute_insert(self, size=10000, cols=[], is_insert_ignore=False):
+        """执行插入语句
+        Args:
+            size: 多少行插入一次(commit一次)
+            cols: 如果重复需要更新的字段
+            is_insert_ignore: 如果重复是否忽略
+        判断执行顺序:
+            1. 如果有设 is_insert_ignore 这执行 INSERT IGNORE INTO
+            2. 如果有设 cols 执行 INSERT INTO ON DUPLICATE UPDATE
+            3. 如果什么都没 INSERT INTO
+        """
+        if is_insert_ignore:
+            self.execute_insert_dup_ignore(size=size)
+        elif cols:
+            self.execute_insert_dup_update(size=size, cols=cols)
+        else:
+            self.execute_insert_dup_update(size=size)
+
     def execute_insert_dup_update(self, size=10000, cols=[]):
-        """通过select获得的数据在另一个表执行"""
+        """通过select获得的数据在另一个表执行
+        INSERT INTO 或
+        INSERT INTO ON DUPLICATE UPDATE
+        """
+        # 获取 ON DUPLICATE 语句
         append_string = self._set_dup_on_update_col(cols=cols)
+
         for rows, count, total_count in self._fetchall_dict(self.qdl_rs, size=size):
             self.dml_conn.execute(
                 self.dml_table.insert(append_string=append_string),
+                rows
+            )
+            print '{count}/{total_count}'.format(count=count, total_count=total_count)
+
+    def execute_insert_dup_ignore(self, size=10000):
+        """通过select获得的数据在另一个表执行
+        INSERT IGNORE INTO
+        """
+        for rows, count, total_count in self._fetchall_dict(self.qdl_rs, size=size):
+            self.dml_conn.execute(
+                self.dml_table.insert().prefix_with('IGNORE'),
                 rows
             )
             print '{count}/{total_count}'.format(count=count, total_count=total_count)
@@ -144,7 +178,7 @@ def main():
     select_data2mysql = SelectData2Mysql(**conf)
     select_data2mysql.bind_dml_table('ord_express')
     select_data2mysql.execute_select_sql(sql)
-    select_data2mysql.execute_insert_dup_update(size=5, cols=['create_time'])
+    select_data2mysql.execute_insert(size=5, cols=['create_time'], is_insert_ignore=True)
 
 
 if __name__ == '__main__':
