@@ -199,3 +199,73 @@ python create_class_property.py
         self._remote_dir = value
 ```
 
+## check_migration_count.py
+多进程检测两个库之间的数据行数是否相等
+
+**主要代码**
+
+```
+if __name__ == '__main__':
+    conf1 = {
+        'username': 'xxx',
+        'password': 'xxx',
+        'host': 'xxx',
+        'port': 3306,
+        'database': 'xxx',
+        'charset': 'utf8',
+        'tag': 'baichuan', # 用于标记是哪个实例, 方便输出确认
+    }
+
+    conf2 = {
+        'username': 'xxx',
+        'password': 'xxx',
+        'host': 'xxx',
+        'port': 3306,
+        'database': 'xxx',
+        'charset': 'utf8',
+        'tag': 'jushita ', # 用于标记是哪个实例, 方便输出确认
+    }
+
+
+    # 不需要比较的表
+    exclude = [
+        'easy_agent_trade',
+        'easy_agent_view',
+        'guide_income_detail',
+        'store_all_trade',
+        'store_guide_group_condition',
+        'store_trade_online',
+        'web_tmallshoplist',
+    ]
+
+    q = multiprocessing.Queue(maxsize = 2) # 定义一个队列
+
+    # 创建多线程执行获得表行数操作
+    p1 = multiprocessing.Process(target = worker, args = (q, conf1, exclude,))
+    p2 = multiprocessing.Process(target = worker, args = (q, conf2, exclude,))
+
+    # 开始多进程进行获取各自数据库表行数
+    p1.start()
+    p2.start()
+
+    # 冻结当前(主)进程
+    p1.join()
+    p2.join()
+
+    # 检测
+    checker(q)
+
+```
+
+只需要修改 `conf1`, `conf2`变量的数据库连接参数就好
+
+**运行检测**
+
+```
+## 配置数据库源(具体代码见最后check_migration_count.py)
+python check_migration_count.py > /tmp/check_migration_count_$(date +%F).log
+
+grep -n fail /tmp/check_migration_count_$(date +%F).log
+
+less /tmp/check_migration_count_$(date +%F).log
+```
