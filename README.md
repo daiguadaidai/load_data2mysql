@@ -269,3 +269,7 @@ grep -n fail /tmp/check_migration_count_$(date +%F).log
 
 less /tmp/check_migration_count_$(date +%F).log
 ```
+
+## agg_insert_sql.py
+
+查出数据库中的每个表通过使用 DataFrame 将相关表进行merge。并且将获得的数据生成 批量INSERT语句。主要是用于MyCat刷数据
