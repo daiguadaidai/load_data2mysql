@@ -64,12 +64,12 @@ def main():
     excel_name = '/tmp/nbuy52db_info_{dt}.csv'.format(dt = str(time.time()))
 
     sql = '''
-SELECT DISTINCT shop_id
-FROM keeper_relation_keeper_shop
-WHERE keeper_id IN (
-    SELECT DISTINCT keeper_id
-    FROM keeper_session
-    WHERE user_agent LIKE :c
+SELECT DISTINCT id
+FROM test
+WHERE id IN (
+    SELECT DISTINCT id
+    FROM test
+    WHERE aaa LIKE :c
         AND created_at >= '2018-05-27'
     '''
 
