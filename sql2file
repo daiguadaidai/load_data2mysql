@@ -2,6 +2,7 @@
 #-*- coding:utf-8 -*-
 
 from sqlalchemy import create_engine
+from sqlalchemy import text
 import pandas as pd
 import time
 import sys
@@ -32,7 +33,7 @@ class SQL2File(object):
 
         self.df = None # 初始化数据结构
 
-    def sql2csv(self, sql='', file_name='/tmp/sql.xls'):
+    def sql2csv(self, sql='', file_name='/tmp/sql.xls', sql_param=None):
         """执行sql并且导出为Excel
         Args:
             sql: 需要执行的SQL
@@ -40,7 +41,7 @@ class SQL2File(object):
         self.sql2df(sql = sql)
         self.df.to_csv(file_name)
 
-    def sql2df(self, sql=''):
+    def sql2df(self, sql='', sql_param=None):
         """执行sql获得 DataFrame对象
         Args:
             sql: 需要执行的SQL
@@ -51,11 +52,11 @@ class SQL2File(object):
 
 def main():
     db_conf = {
-        'username': 'dwreadonly',
-        'password': 'IQjGSmpG4KkaPv',
-        'host': 'rm-bp16x1ew62a993w46.mysql.rds.aliyuncs.com',
+        'username': 'root',
+        'password': 'root',
+        'host': '127.0.0.1',
         'port': 3306,
-        'database': 'nbuy52db',
+        'database': 'test',
     }
 
     sql2file = SQL2File(**db_conf)
@@ -63,13 +64,16 @@ def main():
     excel_name = '/tmp/nbuy52db_info_{dt}.csv'.format(dt = str(time.time()))
 
     sql = '''
-    SELECT COUNT(*)
-    FROM opt_my_member AS omm
-    WHERE omm.BIND_ASS_ID = 336
-        AND omm.DELETE_FLAG = 0
+SELECT DISTINCT shop_id
+FROM keeper_relation_keeper_shop
+WHERE keeper_id IN (
+    SELECT DISTINCT keeper_id
+    FROM keeper_session
+    WHERE user_agent LIKE :c
+        AND created_at >= '2018-05-27'
     '''
 
-    sql2file.sql2csv(sql = sql, file_name = excel_name)
+    sql2file.sql2csv(sql = text(sql), file_name = excel_name, sql_param={'c': '%iOS%Napos%'})
 
 if __name__ == '__main__':
    main()
